@@ -1,0 +1,30 @@
+{
+  "name": "khuise-admin-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "HOST=0.0.0.0 nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "devDependencies": {
+    "@nuxtjs/apollo": "^4.0.1-rc.5",
+    "@nuxtjs/dotenv": "^1.4.1",
+    "@nuxtjs/pwa": "^3.3.5",
+    "@nuxtjs/tailwindcss": "^3.4.2",
+    "core-js": "^3.8.3",
+    "graphql-tag": "^2.11.0",
+    "nuxt": "^2.14.12",
+    "nuxt-material-design-icons": "^1.0.4",
+    "pug": "^3.0.0",
+    "pug-plain-loader": "^1.1.0",
+    "text-mask-addons": "^3.8.0",
+    "v-mask": "^2.2.4",
+    "vue-fragment": "^1.5.1",
+    "vue-picture": "^1.2.0"
+  },
+  "dependencies": {
+    "vuex-persist": "^3.1.3"
+  }
+}
