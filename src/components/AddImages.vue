@@ -1,4 +1,6 @@
 <template lang="pug">
-Nuxt
 </template>
+
+<script>
+</script>
 

@@ -1,26 +1,34 @@
 import gql from "graphql-tag"
 
 export default async function (context) {
-  if (context.$store.state.isLogged) {
+  if (!context.store.state.isLogged) {
     if (context.route.path !== "/account/login") {
-      const meResult = await this.$apollo.mutate({
+      const { 
+        app: { apolloProvider: { defaultClient: apollo } }
+      } = context
+
+      const { data: { me: meData } } = await apollo.mutate({
         mutation: gql`
           query Me {
             me {
               email
-              fisrtName
+              firstName
               lastName
             }
           }
         `
       })
-      if (meResult) {
-        context.$store.commit("auth/setIsLogged", true)
-        context.redirect(context.from.path)
+      if (meData) {
+        context.store.commit("auth/setIsLogged", true)
+        context.redirect(context.store.state.nextPath)
       } else {
-        context.$store.commit("auth/setNextPath", context.from.path)
+        context.store.commit("auth/setNextPath", context.route.path)
         context.redirect("/account/login")
       }
+    }
+  } else {
+    if (context.route.path == "/account/login") {
+      context.redirect("/")
     }
   }
 }

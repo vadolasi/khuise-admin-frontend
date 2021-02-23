@@ -44,40 +44,47 @@ fragment
           SkelethonProduct
           SkelethonProduct
           SkelethonProduct
+          SkelethonProduct
+          SkelethonProduct
+          SkelethonProduct
+          SkelethonProduct
         .grid.grid-cols-1(v-else class="md:grid-cols-2 lg:grid-cols-4")
-          Product(v-for="product in products.edges" v-bind:key="product.node.id" :product="product.node")
+          Product(v-for="product in products.edges" v-bind:key="product.node.id" :product="product.node") 
 </template>
 
 <script>
 import gql from "graphql-tag"
 
 export default {
+  name: "ProductsPage",
   head: {
     title: "Lista de produtos",
   },
   apollo: {
-    products: gql`
-      query Products {
-        products {
-          edges {
-            node {
-              id
-              pk
-              name
-              description
-              price
-              images(last: 1) {
-                edges {
-                  node {
-                    image
+    $client: "products",
+    products: {
+      query: gql`
+        query Products {
+          products {
+            edges {
+              node {
+                id
+                name
+                description
+                price
+                images(last: 1) {
+                  edges {
+                    node {
+                      image
+                    }
                   }
-                }
-              }
+                } 
+              } 
             }
           }
-        }
-      }
-    `
+        }  
+      `,
+    }
   }
 }
 </script>

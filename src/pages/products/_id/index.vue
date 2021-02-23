@@ -1,7 +1,6 @@
 <template lang="pug">
 div(class="w-full overflow-auto")
-  DangerConfirmModal(v-model="deleteProductModal" title="Deletar produto" message="Tem certeza que deseja deletar este produto?" @confirm="deleteProduct")
-  div(class="mx-auto my-5 w-4/5 lg:w-3/4 overfl.com/-fqow-auto")
+  div(class="mx-auto my-5 w-4/5 lg:w-3/4 w-auto")
     div(class="lg:grid lg:grid-cols-3")
       CRUDImages
       CRUDProduct
@@ -22,16 +21,17 @@ const currencyMask = createNumberMask({
 })
 
 export default {
-  head: {
-    title: productStore.name
+  head () {
+    return {
+      title: this.$store.state.name    
+    }
   },
-  async asyncData ({ route }) {
-    if (productStore.pk == route.params.id) {
-      var name = productStore.name
-      var price = productStore.price
+  apollo: {
+    product () {
+      var query = null
 
-      const data = await this.$apollo.mutate({
-        mutation: gql`
+      if (this.$store.state.id == this.$route.params.id) {
+        query = gql`
           query GetProduct(
             $id: ID!
           ) {
@@ -40,27 +40,17 @@ export default {
               stock {
                 edges {
                   node {
-                    pk
-                    color
                     size
+                    color
                     stock
                   }
                 }
               }
             }
           }
-        `,
-        variables: {
-          id: productStore.id
-        }
-      })
-
-      var description = data.data.product.description
-      var stock = data.data.product.stock.edges
-      var stockLength = data.data.product.stock.edges.length
-    } else {
-      const data = await this.$apollo.mutate({
-        mutation: gql`
+        `
+      } else {
+        query = gql`
           query GetProduct($id: ID!) {
             product(id: $id) {
               name
@@ -84,277 +74,43 @@ export default {
               }
             }
           }
-        `,
+        `
+      }
+
+      return {
+        query: query,
         variables: {
-          id: productStore.pk
+          id: this.$route.params.id
+        },
+        update: ({ product }) => {
+          if (
+            this.$store.state.product.id
+            !== this.$route.params.id
+          ) {
+      		  this.$store.commit("product/setId", this.$route.params.id)
+            this.$store.commit("product/setName", product.name)
+            this.$store.commit("product/setDescription")
+            this.$store.commit("product/setPrice", product.price)
+            this.$store.commit("product/setStock", product.stock.edges)
+            this.$store.commit("product/setImages", product.images.edges)
+	        }
+
+          return product
         }
-      })
-
-      const productResult = data.data.product
-      var name = productResult.name
-      var description = productResult.description
-      var price = productResult.price
-      var stock = productResult.stock.edges
-      var stockLength = data.data.product.stock.edges.length
+      }
     }
+  },
 
-    var deleteStockModal = []
-
-    for (var i = 0; i < stockLength; i++) {
-      deleteStockModal.push(false)
-    }
-
+  data () {
     return {
-      name: name,
-      description: description,
-      price: price,
-      stock: stock,
-      deleteStockModal: deleteStockModal,
-      editStock: [...deleteStockModal],
-      addingStock: [...deleteStockModal]
-    }
-  },
-
-  data: {
-    name: null,
-    description: null,
-    price: null,
-    stockLength: null,
-    editName: false,
-    editDescription: false,
-    editPrice: false,
-    editStock: null,
-    addingStock: null,
-    deleteProductModal: false,
-    deleteStockModal: null,
-    mask: currencyMask
-  },
-
-  methods: {
-    async addStock (index) {
-      const data = await this.$apollo.mutate({
-        mutation: gql`
-          mutation AddStock(
-            $color: String!
-            $size: String!
-            $stock: Int!
-            $product: String!
-          ) {
-            addStock(
-              input: {
-                color: $color
-                size: $size
-                stock: $stock
-                product: $product
-              }
-            ) {
-              errors {
-                field
-                messages
-              }
-            }
-          }
-        `,
-        variables: {
-          color: this.stock[index].node.color,
-          size: this.stock[index].node.size,
-          stock: this.stock[index].node.stock,
-          product: productStore.pk
-        }
-      })
-
-      if (data.data.addStock.errors.length == 0) {
-        this.$set(this.addingStock, index, false)
-      }
-    },
-
-    async deleteProduct () {
-      const data = await this.$apollo.mutate({
-        mutation: gql`
-          mutation RemoveProduct(
-            $id: ID!
-          ) {
-            deleteProduct(id: $id) {
-              errors {
-                field
-                messages
-              }
-            }
-          }
-        `,
-        variables: {
-          id: productStore.pk
-        }
-      })
-    },
-
-    async deleteStock (id, index) {
-      const data = await this.$apollo.mutate({
-        mutation: gql`
-          mutation RemoveStock(
-            $id: ID!
-          ) {
-            deleteStock(id: $id) {
-              errors {
-                field
-                messages
-              }
-            }
-          }
-        `,
-        variables: {
-          id: id
-        }
-      })
-
-      if (data.data.deleteStock.errors.length == 0) {
-        this.stock.splice(index)
-      }
-    },
-
-    async setName () {
-      if (this.name !== productStore.name) {
-        const data = await this.$apollo.mutate({
-          mutation: gql`
-            mutation EditProduct(
-              $id: ID!
-              $name: String!
-            ) {
-              updateProduct(
-                id: $id
-                input: { name: $name }
-              ) {
-                errors {
-                  field
-                  messages
-                }
-              }
-            }
-          `,
-          variables: {
-            id: productStore.pk,
-            name: this.name
-          }
-        })
-
-        if (data.data.updateProduct.errors.length > 0) {
-          this.name = productStore.name
-        } else {
-          productStore.setName(this.name)
-        }
-      }
-      this.editName = false
-    },
-
-    async setDescription () {
-      if (this.description !== productStore.description) {
-        const data = await this.$apollo.mutate({
-          mutation: gql`
-            mutation EditProduct(
-              $id: ID!
-              $description: String!
-            ) {
-              updateProduct(
-                id: $id
-                input: { description: $description }
-              ) {
-                errors {
-                  field
-                  messages
-                }
-              }
-            }
-          `,
-          variables: {
-            id: productStore.pk,
-            description: this.description
-          }
-        })
-
-        if (data.data.updateProduct.errors.length > 0) {
-          this.description = productStore.description
-        }
-      }
-      this.editDescription = false
-    },
-
-    async setPrice () {
-      if (this.price !== productStore.price) {
-        const data = await authStore.makeRequest(
-          {
-            query: gql`
-              mutation EditProduct(
-                $id: ID!
-                $price: Float!
-              ) {
-                updateProduct(
-                  id: $id
-                  input: { price: $price }
-                ) {
-                  errors {
-                    field
-                    messages
-                  }
-                }
-              }
-            `,
-            variables: {
-              id: productStore.pk,
-              price: Number(this.price.replace(/[^\d,-]/g, '').replace(',', '.'))
-            }
-          }
-        )
-
-        if (data.data.updateProduct.errors.length > 0) {
-          this.price = productStore.price
-        } else {
-          this.price = this.price.replace(/[^\d,-]/g, '')
-          productStore.setPrice(this.price.replace(/[^\d,-]/g, '').replace(',', '.'))
-        }
-      }
-      this.editPrice = false
-    },
-
-    async setStock (id, index) {
-      const data = await authStore.makeRequest(
-        {
-          query: gql`
-            mutation EditStock(
-              $id: ID!
-              $color: String!
-              $size: String!
-              $stock: Int!
-            ) {
-              updateStock(
-                id: $id
-                input: {
-                  color: $color
-                  size: $size
-                  stock: $stock
-                }
-              ) {
-                errors {
-                  field
-                  messages
-                }
-              }
-            }
-          `,
-          variables: {
-            id: id,
-            color: this.stock[index].node.color,
-            size: this.stock[index].node.size,
-            stock: this.stock[index].node.stock
-          }
-        }
-      )
-
-      if (data.data.updateStock.errors.length > 0) {
-        this.name = productStore.name
-      } else {
-        productStore.setStock(this.stock)
-      }
-      this.$set(this.editStock, index, false)
+      name: null,
+      description: null,
+      price: null,
+      editName: false,
+      editDescription: false,
+      editPrice: false,
+      deleteProductModal: false,
+      mask: currencyMask
     }
   }
 }

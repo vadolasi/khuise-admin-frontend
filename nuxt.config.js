@@ -1,3 +1,10 @@
+const DefaultApolloOptions = {
+    httpEndpoint: process.env.BACKEND_ENDPOINT || "https://khuise-shop-6598.herokuapp.com/graphql-web/",
+    httpLinkOptions: {
+    credentials: "include"
+  }
+}
+
 export default {
   srcDir: "src",
 
@@ -19,9 +26,6 @@ export default {
   css: [],
 
   plugins: [
-    {
-      src: "@/plugins/directives"
-    },
     {
       src: "@/plugins/fragment"
     },
@@ -53,12 +57,16 @@ export default {
   },
 
   modules: [
+    "@nuxtjs/apollo",
     "@nuxtjs/dotenv",
     "nuxt-material-design-icons"
   ],
 
-  env: {
-    backendUrl: process.env.BACKEND_ENDPOINT || "https://khuise-shop-6598.herokuapp.com/graphql-web/"
+  apollo: {
+    clientConfigs: {
+      default: DefaultApolloOptions,
+      products: DefaultApolloOptions
+    }
   },
 
   build: {}

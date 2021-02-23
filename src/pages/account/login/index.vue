@@ -1,9 +1,6 @@
 <template lang="pug">
 div(class="flex h-screen")
-  div(class="w-4/5 lg:w-1/3 m-auto")
-    div(v-if="loading")
-      h1 Carregando
-    div(v-else)
+  div(class="w-4/5 lg:w-1/3 m-auto") 
       label(class="text-gray-700") Email
       input(v-model="email" type="email" class="w-full my-2 px-4 py-2 border rounded-lg text-pink-700 focus:outline-none focus:border-pink-500")
       label(class="text-gray-700") Senha
@@ -15,41 +12,52 @@ div(class="flex h-screen")
 </template>
 
 <script>
+import gql from "graphql-tag"
+
 export default {
-  data: {
-    email: "",
-    password: "",
-    remember: true
+  layout: "empty",
+  data () {
+    return {
+      email: "",
+      password: "",
+      remember: true
+    }
   },
 
   methods: {
     async login() {
-      const loginResult = await this.$apollo.mutate({
+      const {
+	data: { tokenAuth: loginData }
+      } = await this.$apollo.mutate({
         mutation: gql`
           mutation Login(
-            $email: String!
-            $password: String!
-          ) {
-            tokenAuth(input: {
-              email: $email
-              password: $password
+	    $email: String!
+	    $password: String!
+	  ) {
+            tokenAuth (input: {
+	      email: $email
+	      password: $password
             }) {
               success
-              errors
-              user {
-                firstName
-                lastName
-              }
-            }
-          }
-        `
+	      errors
+	      user {
+		firstName
+		lastName
+	      }
+	    }
+	  }
+        `,
+	variables: {
+	  email: this.email,
+	  password: this.password
+	}
       })
 
-      if (loginResult.success) {
-        this.$store.commit("auth/setFirstName", loginResult.firstName)
-        this.$store.commit("auth/setLastName", loginResult.lastName)
+      if (loginData.success) {
+        this.$store.commit("auth/setFirstName", loginData.firstName)
+        this.$store.commit("auth/setLastName", loginData.lastName)
         this.$store.commit("auth/setIsLogged", true)
-        this.$router.push(this.$store.state.nextPath)
+        this.$router.push("/") // this.$store.state.nextPath)
       }
     }
   }

@@ -14,9 +14,9 @@ fragment
         fragment(v-for="(productType, index) in stock" v-bind:key="index")
           Input(v-model="stock[index].size" placeholder="Tamanho")
           Input(v-model="stock[index].color" placeholder="Cor")
-          Input(v-model="stock[index].stock" placeholder="Quantidade")
+          Input(v-model="stock[index].stock" type="number" placeholder="Quantidade")
           button(class="bg-pink-500 hover:bg-pink-700 text-white py-1 px-3 font-bold rounded" @click="stock.splice(index, 1)") Remover
-      button(class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded" @click='stock.push({size: "", color: "", stock: ""})') Adicionar
+      button(class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded" @click='stock.push({size: "", color: "", stock: null})') Adicionar
       h2(class="text-xl font-bold text-pink-600 my-5") Imagens
       div(class="grid grid-cols-2 gap-4")
         fragment(v-for="(image, index) in images" v-bind:key="index")
@@ -45,20 +45,22 @@ export default {
   head: {
     title: "Adicionar produto"
   },
-  data: {
-    mask = currencyMask,
-    name = "",
-    description = "",
-    price = "",
-    categories = [],
-    stock = [],
-    images = []
+  data () {
+    return {
+      mask: currencyMask,
+      name: "",
+      description: "",
+      price: "",
+      categories: [],
+      stock: [],
+      images: []
+    }
   },
   methods: {
-    save: async function () {
-      const productData = await this.$apollo.mutate({
+    async save () {
+      const { data: { addProduct: productData  } } = await this.$apollo.mutate({
         mutation: gql`
-          mutation AddProduct(
+          mutation addProduct(
             $name: String!
             $description: String!
             $price: Float!
@@ -70,11 +72,6 @@ export default {
             }) {
               product {
                 id
-                pk
-              }
-              errors {
-                field
-                messages
               }
             }
           }
@@ -86,38 +83,42 @@ export default {
         }
       })
 
-      const stockData = await this.$apollo.mutate({
+      console.log(this.stock.map(
+            (productType) => {
+              return { product: productData.product.id, stock: Number(productType.stock), ...productType }
+            }
+          )
+        )
+
+      const { data: { addStock: stockData  }  } = await this.$apollo.mutate({
         mutation: gql`
           mutation AddStock(
-            $stock: [CreateStockSerializerInput]!
+            $stock: [BatchCreateStockInput]!
           ) {
             addStock(input: $stock) {
-              errors {
-                field
-                messages
-              }
+	            stocks {
+                id
+	            }
             }
           }
         `,
         variables: {
           stock: this.stock.map(
             (productType) => {
-              return { product: productData.product.pk, ...productType }
+              return { product: productData.product.id, stock: parseInt(productType.stock), ...productType }
             }
           )
         }
       })
 
-      if (
-        productData.errors.length == 0
-        && stockData.errors.length == 0
-      ) {
-        productStore.setId(productData.product.id)
-        productStore.setPk(productData.product.pk)
-        productStore.setName(this.name)
-        productStore.setPrice(Number(this.price.replace(/[^\d.-]/g, '').replace(',', '.')))
-        this.$router.push(`/products/${productData.product.pk}`)
-      }
+      this.$store.commit("product/setId", productData.product.id)
+      this.$store.commit("product/setName", this.name)
+      this.$store.commit("product/setPrice", parseFloat(this.price.replace(/[^\d.-]/g, '').replace(',', '.')))
+      this.$store.commit("product/setStock", this.stock.map((productType) => {
+        return { node: productType }
+      }))
+      this.$apollo.provider.clients.products.cache.data.clear()
+      this.$router.push(`/products/${productData.product.id}`)
     }
   }
 }

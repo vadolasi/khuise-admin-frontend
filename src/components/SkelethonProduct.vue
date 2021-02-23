@@ -9,3 +9,9 @@ div(class="animate-pulse m-3 bg-white shadow-lg rounded")
         div(class="h-4 w-12 bg-pink-400 rounded")
 </template>
 
+<script>
+export default {
+  name: "SkelethonProduct"
+}
+</script>
+
