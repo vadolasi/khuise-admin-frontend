@@ -22,8 +22,10 @@ export default {
     }
   },
 
-  data: {
-    isLoaded: false,
+  data () {
+    return {
+      isLoaded: false    
+    }
   },
 
   methods: {

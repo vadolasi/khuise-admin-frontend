@@ -60,6 +60,7 @@ export default {
               images {
                 edges {
                   node {
+                    id
                     image
                   }
                 }

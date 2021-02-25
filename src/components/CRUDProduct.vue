@@ -7,7 +7,7 @@ div(class="lg:m-4")
           v-model="name"
           @blur="setName"
           @keyup.enter="setName"
-          class="w-full font-bold text-3xl text-gray-800 border border-pink-700 focus:outline-none rounded"
+          class="w-full font-bold text-3xl text-gray-800 border border-pink-500 focus:outline-none rounded"
           v-focus
         )
         h2(v-else class="font-bold text-3xl text-gray-800") {{ name }}
@@ -18,7 +18,7 @@ div(class="lg:m-4")
           v-model="description"
           @blur="setDescription"
           @keyup.enter="setDescription"
-          class="text-sm text-gray-700 border border-pink-700 focus:outline-none rounded my-3 w-full"
+          class="text-sm text-gray-700 border border-pink-500 focus:outline-none rounded my-3 w-full"
           v-focus
         )
         p(v-else v-model="description" class="text-sm text-gray-700 px-1 mr-1 my-3") {{ description }}

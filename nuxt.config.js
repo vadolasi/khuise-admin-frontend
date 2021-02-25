@@ -27,6 +27,9 @@ export default {
 
   plugins: [
     {
+      src: "plugins/directives"
+    },
+    {
       src: "plugins/fragment"
     },
     {
