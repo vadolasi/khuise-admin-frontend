@@ -9,12 +9,16 @@
     "generate": "nuxt generate"
   },
   "devDependencies": {
+    "@aceforth/nuxt-optimized-images": "^1.4.0",
+    "@luxdamore/nuxt-prune-html": "^2.0.6",
     "@nuxtjs/apollo": "^4.0.1-rc.5",
     "@nuxtjs/dotenv": "^1.4.1",
     "@nuxtjs/pwa": "^3.3.5",
     "@nuxtjs/tailwindcss": "^3.4.2",
     "core-js": "^3.8.3",
     "graphql-tag": "^2.11.0",
+    "imagemin-mozjpeg": "^9.0.0",
+    "imagemin-pngquant": "^9.0.1",
     "nuxt": "^2.14.12",
     "nuxt-material-design-icons": "^1.0.4",
     "pug": "^3.0.0",

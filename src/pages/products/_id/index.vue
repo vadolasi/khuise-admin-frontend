@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="w-full overflow-auto")
-  div(class="mx-auto my-5 w-4/5 lg:w-3/4 w-auto")
+  div(v-if="$apollo.loading" class="mx-auto my-5 w-4/5 lg:w-3/4 w-auto")
+  div(v-else class="mx-auto my-5 w-4/5 lg:w-3/4 w-auto")
     div(class="lg:grid lg:grid-cols-3")
       CRUDImages
       CRUDProduct
@@ -9,16 +10,6 @@ div(class="w-full overflow-auto")
 
 <script>
 import gql from "graphql-tag"
-import createNumberMask from "text-mask-addons/dist/createNumberMask"
-
-const currencyMask = createNumberMask({
-  prefix: "R$",
-  allowDecimal: true,
-  thousandsSeparatorSymbol: ".",
-  decimalSymbol: ",",
-  includeThousandsSeparator: true,
-  allowNegative: false,
-})
 
 export default {
   head () {
@@ -27,6 +18,7 @@ export default {
     }
   },
   apollo: {
+    $client: "product",
     product () {
       var query = null
 
@@ -37,9 +29,18 @@ export default {
           ) {
             product(id: $id) {
               description
+              images(first: 2) {
+                edges {
+                  node {
+                    id
+                    image
+                  }
+                }
+              }
               stock {
                 edges {
                   node {
+                    id
                     size
                     color
                     stock
@@ -66,6 +67,7 @@ export default {
               stock {
                 edges {
                   node {
+                    id
                     color
                     size
                     stock
@@ -89,28 +91,16 @@ export default {
           ) {
       		  this.$store.commit("product/setId", this.$route.params.id)
             this.$store.commit("product/setName", product.name)
-            this.$store.commit("product/setDescription")
             this.$store.commit("product/setPrice", product.price)
-            this.$store.commit("product/setStock", product.stock.edges)
-            this.$store.commit("product/setImages", product.images.edges)
-	        }
+          }
+
+          this.$store.commit("product/setDescription", product.description)
+          this.$store.commit("product/setStock", product.stock.edges)
+          this.$store.commit("product/setImages", product.images.edges)
 
           return product
         }
       }
-    }
-  },
-
-  data () {
-    return {
-      name: null,
-      description: null,
-      price: null,
-      editName: false,
-      editDescription: false,
-      editPrice: false,
-      deleteProductModal: false,
-      mask: currencyMask
     }
   }
 }

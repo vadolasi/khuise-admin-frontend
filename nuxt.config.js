@@ -27,14 +27,14 @@ export default {
 
   plugins: [
     {
-      src: "@/plugins/fragment"
+      src: "plugins/fragment"
     },
     {
-      src: "@/plugins/imageUpload",
+      src: "plugins/imageUpload",
       mode: "client"
     },
     {
-      src: "@plugins/mask",
+      src: "plugins/mask",
       mode: "client"
     }
   ],
@@ -46,10 +46,15 @@ export default {
   },
 
   buildModules: [
+    "@aceforth/nuxt-optimized-images",
     "@nuxtjs/tailwindcss",
     "@nuxtjs/pwa"
   ],
 
+  optimizedImages: {
+    optimizeImages: true
+  },
+ 
   pwa: {
     manifest: {
       lang: "pt-br"
@@ -57,6 +62,7 @@ export default {
   },
 
   modules: [
+    "@luxdamore/nuxt-prune-html",
     "@nuxtjs/apollo",
     "@nuxtjs/dotenv",
     "nuxt-material-design-icons"
@@ -65,7 +71,8 @@ export default {
   apollo: {
     clientConfigs: {
       default: DefaultApolloOptions,
-      products: DefaultApolloOptions
+      products: DefaultApolloOptions,
+      product: DefaultApolloOptions
     }
   },
 

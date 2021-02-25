@@ -18,6 +18,9 @@ export const mutations = {
   setName(state, name) {
     state.name = name
   },
+  setDescription(state, description) {
+    state.description = description
+  },
   setPrice(state, price) {
     state.price = price
   },
@@ -26,24 +29,6 @@ export const mutations = {
   },
   setStock(state, stock) {
     state.stock = stock
-  },
-  setStockControllers(state, stockLength) {
-    var base = []
-
-    for (var i = 0; i < stockLength; i++) {
-      base.push(false)
-    }
-
-    state.deleteStockModal = base
-    state.editStock = base
-    state.addingStock = base
-  },
-  removeStock(state, index) {
-    state.stock.splice(index)
-  },
-  preAddStock(state) {
-    state.stock.push({ node: { name: "", description: "", price: "" } })
-    state.addingStock.push(false)
   }
 }
 

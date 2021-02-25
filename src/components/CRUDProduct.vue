@@ -7,11 +7,11 @@ div(class="lg:m-4")
           v-model="name"
           @blur="setName"
           @keyup.enter="setName"
-          class="font-bold text-3xl text-gray-800 border border-pink-700 focus:outline-none rounded"
+          class="w-full font-bold text-3xl text-gray-800 border border-pink-700 focus:outline-none rounded"
           v-focus
         )
         h2(v-else class="font-bold text-3xl text-gray-800") {{ name }}
-          button(class="bg-transparent rounded-full hover:text-pink-700" @click="editName = true")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700" @click="editName = true")
             span(class="material-icons align-middle") create
         textarea(
           v-if="editDescription"
@@ -22,13 +22,13 @@ div(class="lg:m-4")
           v-focus
         )
         p(v-else v-model="description" class="text-sm text-gray-700 px-1 mr-1 my-3") {{ description }}
-          button(class="bg-transparent rounded-full hover:text-pink-700" @click="editDescription = true")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700" @click="editDescription = true")
             span(class="material-icons align-middle") create
         div(class="user flex items-center -ml-3 mt-2 mb-4")
           div(class="p-4")
             input(
               v-if="editPrice"
-              class="text-3xl text-gray-900"
+              class="w-full border border-pink-500 rounded text-3xl text-gray-900 focus:outline-none"
               v-model="price"
               v-mask="mask"
               v-focus
@@ -36,9 +36,9 @@ div(class="lg:m-4")
               @keyup.enter="setPrice"
             )
             p(v-else class="text-3xl text-gray-900") R${{ price }}
-              button(class="bg-transparent rounded-full hover:text-pink-700" @click="editPrice = true")
+              button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700" @click="editPrice = true")
                 span(class="material-icons align-middle") create
-        button(class="w-full p-2 font-semibold text-center uppercase bg-pink-500 rounded text-white mt-3 focus:outline-none" @click="deleteProductModal = true")
+        button(class="transition duration-200 ease-in-out font-semibold w-full p-2 text-center uppercase bg-pink-500 rounded text-white mt-3 focus:outline-none hover:bg-pink-700" @click="deleteProductModal = true")
           | Remover
 </template>
 
@@ -89,24 +89,19 @@ export default {
                 id: $id
                 input: { name: $name }
               ) {
-                errors {
-                  field
-                  messages
+                product {
+                  id
                 }
               }
             }
           `,
           variables: {
-            id: this.store.state.product.id,
+            id: this.$store.state.product.id,
             name: this.name
           }
         })
-
-        if (data.data.updateProduct.errors.length > 0) {
-          this.name = this.$store.state.product.name
-        } else {
-          this.$store("product/setName", this.name)
-        }
+        this.$apollo.provider.clients.products.cache.data.clear()
+        this.$store.commit("product/setName", this.name)
       }
       this.editName = false
     },
@@ -123,9 +118,8 @@ export default {
                 id: $id
                 input: { description: $description }
               ) {
-                errors {
-                  field
-                  messages
+                product {
+                  id
                 }
               }
             }
@@ -135,11 +129,8 @@ export default {
             description: this.description
           }
         })
-
-        if (data.data.updateProduct.errors.length > 0) {
-          this.description = this.$store.state.product.description
-        }
       }
+      this.$apollo.provider.clients.product.cache.data.clear()
       this.editDescription = false
     },
 
@@ -155,9 +146,8 @@ export default {
                 id: $id
                 input: { price: $price }
               ) {
-                errors {
-                  field
-                  messages
+                product {
+                  id
                 }
               }
             }
@@ -167,12 +157,9 @@ export default {
             price: Number(this.price.replace(/[^\d,-]/g, '').replace(',', '.'))
           }
         })
-        if (data.data.updateProduct.errors.length > 0) {
-          this.price = this.$store.state.product.price
-        } else {
-          this.price = this.price.replace(/[^\d,-]/g, '')
-          this.$store.commit("product/setPrice", this.price.replace(/[^\d,-]/g, '').replace(',', '.'))
-        }
+        this.price = this.price.replace(/[^\d,-]/g, '')
+        this.$store.commit("product/setPrice", this.price.replace(/[^\d,-]/g, '').replace(',', '.'))
+        this.$apollo.provider.clients.products.cache.data.clear()
       }
       this.editPrice = false
     }

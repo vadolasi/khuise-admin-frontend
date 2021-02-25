@@ -1,7 +1,7 @@
 <template lang="pug">
 fragment
   h2.mt-8.mb-4.text-2xl Estoque
-    button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" @click="preAddStock")
+    button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" @click="preAddStock")
       span(class="material-icons align-middle") add
   table(class="w-full")
     thead(class="bg-pink-500 text-white")
@@ -23,17 +23,17 @@ fragment
           td(class="text-center py-3 px-4") {{ productType.node.color }}
           td(class="text-center py-3 px-4") {{ productType.node.size }}
           td(class="text-center py-3 px-4") {{ productType.node.stock }}
-        DangerConfirmModal(v-model="deleteStockModal[index]" title="Deletar estoque" message="Tem certeza que deseja deletar este estoque?" @confirm="deleteStock(productType.node.pk, index)")
+        DangerConfirmModal(v-model="deleteStockModal[index]" title="Deletar estoque" message="Tem certeza que deseja deletar este estoque?" @confirm="deleteStock(productType.node.id, index)")
         td(class="py-3 px-4 flex justify-around")
-          button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-if="editStock[index]" @click="setStock(productType.node.pk, index)")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-if="editStock[index]" @click="setStock(productType.node.id, index)")
             span(class="material-icons align-middle") check
-          button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else-if="addingStock[index]" @click="addStock(index)")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else-if="addingStock[index]" @click="addStock(index)")
             span(class="material-icons align-middle") check
-          button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else @click="$set(editStock, index, true)")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else @click="$set(editStock, index, true)")
             span(class="material-icons align-middle") create
-          button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-if="addingStock[index]" @click="stock.splice(index, 1);addingStock.splice(index, 1)")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-if="addingStock[index]" @click="stock.splice(index, 1);addingStock.splice(index, 1)")
             span(class="material-icons align-middle") close
-          button(class="bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else @click="$set(deleteStockModal, index, true)")
+          button(class="transition duration-200 ease-in-out bg-transparent rounded-full hover:text-pink-700 focus:outline-none" v-else @click="$set(deleteStockModal, index, true)")
             span(class="material-icons align-middle") delete
 </template>
 
@@ -58,9 +58,9 @@ export default {
 	},
   methods: {
     preAddStock(state) {
-      this.stock.push({ node: { name: "", description: "", price: "" } })
+      this.stock.push({ node: { id: "", name: "", description: "", price: "" } })
       this.addingStock.push(true)
-      this.errors.push({ node: { name: "", description: "", price: "" } })
+      this.errors.push({ node: {  name: "", description: "", price: "" } })
     },
 
     async addStock (index) {
@@ -70,7 +70,7 @@ export default {
             $color: String!
             $size: String!
             $stock: Int!
-            $product: String!
+            $product: ID!
           ) {
             addStock(
               input: {
@@ -80,22 +80,30 @@ export default {
                 product: $product
               }
             ) {
-              errors {
-                field
-                messages
+              stocks {
+                id
               }
             }
           }
         `,
         variables: {
-          color: this.$store.state.product.stock[index].node.color,
-          size: this.$store.state.product.stock[index].node.size,
-          stock: this.$store.state.product.stock[index].node.stock,
+          color: this.stock[index].node.color,
+          size: this.stock[index].node.size,
+          stock: this.stock[index].node.stock,
           product: this.$store.state.product.id
         }
       })
-
-      this.$store.commit("product/setAddingStock", index, false) 
+      this.$set(
+        this.stock,
+        index,
+        {
+          node: {
+            id: stockData.stocks[0].id,
+            ...this.stock[index].node
+          }
+        }
+      )
+      this.$set(this.addingStock, index, false)
     },
     async deleteStock (id, index) {
       const data = await this.$apollo.mutate({
@@ -104,10 +112,7 @@ export default {
             $id: ID!
           ) {
             deleteStock(id: $id) {
-              errors {
-                field
-                messages
-              }
+              found 
             }
           }
         `,
@@ -115,47 +120,44 @@ export default {
           id: id
         }
       })
-
-      this.$store.commit("product/removeStock", index)
+      this.stock.splice(index, 1)
     },
 
     async setStock (id, index) {
-      const data = await authStore.makeRequest(
-        {
-          query: gql`
-            mutation EditStock(
-              $id: ID!
-              $color: String!
-              $size: String!
-              $stock: Int!
-            ) {
-              updateStock(
-                id: $id
-                input: {
-                  color: $color
-                  size: $size
-                  stock: $stock
-                }
-              ) {
-                errors {
-                  field
-                  messages
-                }
+      console.log(id)
+      const data = await this.$apollo.mutate({
+        mutation: gql`
+          mutation EditStock(
+            $id: ID!
+            $color: String!
+            $size: String!
+            $stock: Int!
+          ) {
+            updateStock(
+              id: $id
+              input: {
+                color: $color
+                size: $size
+                stock: $stock
               }
+            ) {
+              stock {
+                id
+              } 
             }
-          `,
-          variables: {
-            id: id,
-            color: this.stock[index].node.color,
-            size: this.stock[index].node.size,
-            stock: this.stock[index].node.stock
           }
+        `,
+        variables: {
+          id: id,
+          color: this.stock[index].node.color,
+          size: this.stock[index].node.size,
+          stock: this.stock[index].node.stock
         }
-      )
+      })
 
       this.$store.commit("product/setStock", this.stock)
 
-      this.$store.commit("product/setEditStock", index, false)
+      this.$set(this.editStock, index, false)
     }
   }
 }
