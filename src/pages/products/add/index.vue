@@ -25,6 +25,8 @@ fragment
             @remove="removeImage(index)"
             :prefill="image"
             :removable="true"
+            :crop="false"
+            zIndex="0"
             :customStrings="pictureInputStrings"
             buttonClass="transition duration-200 ease-in-out p-1 text-white rounded-md text-sm bg-pink-500 hover:bg-pink-700 font-bold" 
             removeButtonClass="transition duration-200 ease-in-out p-1 rounded-md text-sm text-pink-500 border border-pink-500 bg-tranparent font-bold hover:bg-pink-200"

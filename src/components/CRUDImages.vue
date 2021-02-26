@@ -2,7 +2,7 @@
 div(class="col-span-2")
   div(class="grid grid-cols-5 gap-2")
     div(class="overflow-y-auto")
-      div(v-for="(image, index) in imagesUrls" class="mb-1 border border-pink-500 hover:border-pink-700" :class="(selectedImage == index) ? 'border-pink-500' : ''" :key="image")
+      button(v-for="(image, index) in imagesUrls" class="w-full mb-1 border border-pink-500 hover:border-pink-700" :class="(selectedImage == index) ? 'border-pink-500' : ''" :key="image" @click="selectedImage = index; addImage = false")
         img(:src="image" class="object-contain")
       button(class="w-full h-10 border border-pink-500 hover:border-pink-700" @click="addImage = true")
     div(class="col-span-4")
@@ -11,7 +11,6 @@ div(class="col-span-2")
         @remove="removeImage"
         :prefill="(addImage) ? '' : imageUrl"
         :removable="true"
-        accept="image/jpeg,image/png"
         :crop="false"
         zIndex="0"
         :customStrings="pictureInputStrings"
@@ -51,11 +50,59 @@ export default {
     }
   },
   methods: {
-    async addImage(image) {
-      
+    async changeImage(image) {
+      if (this.addImage) {
+        const { data: { addImage: imageData } } = await this.$apollo.mutate({
+          mutation: gql`
+            mutation AddImage(
+              $product: ID!
+              $image: String!
+            ) {
+              addImage(input: {
+                product: $product
+                image: $image
+              }) {
+               image {
+                  id
+               }
+              }
+            }
+          `,
+          variables: {
+            product: this.$store.state.product.id,
+            image: image
+          }
+        })
+        this.$store.commit("product/addImage", imageData.image.id, imageData.image.image)
+        this.addImage = false
+        this.selectedImage - this.$store.state.product.images.length
+      } else {
+        await this.$apollo.mutate({
+          mutation: gql`
+            mutation AddImage(
+              $product: ID!
+              $image: String!
+            ) {
+              updateImage(input: {
+                product: $product
+                image: $image
+              }) {
+               image {
+                  id
+                  image
+               }
+              }
+            }
+          `,
+          variables: {
+            product: this.$store.state.product.id,
+            image: image
+          }
+        })
+      }
     },
     async removeImage() {
-      const { data: { deleteImage: imageData } } = await this.$apollo.mutate({
+      await this.$apollo.mutate({
         mutation: gql`
           mutation RemoveImage(
             $id: ID!
@@ -69,6 +116,10 @@ export default {
           id: this.$store.state.product.images[this.selectedImage].node.id
         }          
       })
+      this.$store.commit("product/removeImage", this.selectedImage)
+      if (this.selectedImage !== 0) {
+        this.selectedImage -= 1
+      }
     }
   }
 }

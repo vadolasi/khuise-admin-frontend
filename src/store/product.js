@@ -27,8 +27,13 @@ export const mutations = {
   setImages(state, images) {
     state.images = images
   },
+  addImage(state, id, image) {
+    state.images.push({ node: { id: id, image: image } })
+  },
+  removeImage(state, index) {
+    state.images.splice(index, 1)
+  },
   setStock(state, stock) {
     state.stock = stock
   }
 }
-
