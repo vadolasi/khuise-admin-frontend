@@ -13041,6 +13041,11 @@ vue-apollo@^3.0.5:
     serialize-javascript "^4.0.0"
     throttle-debounce "^2.1.0"
 
+vue-async-computed@^3.9.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/vue-async-computed/-/vue-async-computed-3.9.0.tgz#af3181c25168bfe9d86d8ffbc7033bf9e484fe84"
+  integrity sha512-ac6m/9zxHHNGGKNOU1en8qNk+fAmEbJLuWL7qyQTFuH3vjv3V4urv//QHcVzCobROM6btnaDG2b+XYMncF/ETA==
+
 vue-chunks@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/vue-chunks/-/vue-chunks-1.0.8.tgz#2b0509f4e501e77c7eab3edf2c3956682cabaaf2"

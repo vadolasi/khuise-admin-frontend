@@ -136,8 +136,8 @@ export default {
 
     async setPrice () {
       if (this.price !== this.$store.state.product.price) {
-        const data = await this.apollo.mutate({
-          query: gql`
+        await this.$apollo.mutate({
+          mutation: gql`
             mutation EditProduct(
               $id: ID!
               $price: Float!

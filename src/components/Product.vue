@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="m-3 bg-white shadow-lg rounded" @click="openProduct")
   div
-    img(v-show="isLoaded" :src="'https://dev-khuise-app.s3-sa-east-1.amazonaws.com/media/' + this.product.images.edges[0].node.image" @load="isLoaded = true")
+    img(v-show="isLoaded" :src="'https://dpkidwvuicjfi.cloudfront.net/media/' + this.product.images.edges[0].node.image" @load="isLoaded = true")
   div(v-if="!isLoaded" class="animate-pulse ';'w-full h-48 bg-pink-400")
   div(class="p-1")
     label(class="flex flex-col group relative p-2")

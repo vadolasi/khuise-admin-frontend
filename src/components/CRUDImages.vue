@@ -41,12 +41,12 @@ export default {
     imagesUrls () {
       return this.$store.state.product.images.map(
         (image) => {
-          return "https://dev-khuise-app.s3-sa-east-1.amazonaws.com/media/" + image.node.image
+          return "https://dpkidwvuicjfi.cloudfront.net/media/" + image.node.image
         }
       )
     },
     imageUrl () {
-      return "https://dev-khuise-app.s3-sa-east-1.amazonaws.com/media/" + this.$store.state.product.images[this.selectedImage].node.image
+       return `https://khuise-shop-6598.herokuapp.com/image?image=${this.$store.state.product.images[this.selectedImage].node.image}`
     }
   },
   methods: {
@@ -64,6 +64,7 @@ export default {
               }) {
                image {
                   id
+                  image
                }
               }
             }
@@ -79,7 +80,7 @@ export default {
       } else {
         await this.$apollo.mutate({
           mutation: gql`
-            mutation AddImage(
+            mutation UpdateImage(
               $product: ID!
               $image: String!
             ) {
@@ -102,23 +103,25 @@ export default {
       }
     },
     async removeImage() {
-      await this.$apollo.mutate({
-        mutation: gql`
-          mutation RemoveImage(
-            $id: ID!
-          ) {
-            deleteImage(id: $id) {
-              found
+      if (!this.addImage) {
+        await this.$apollo.mutate({
+          mutation: gql`
+            mutation RemoveImage(
+              $id: ID!
+            ) {
+              deleteImage(id: $id) {
+                found
+              }
             }
-          }
-        `,
-        variables: {
-          id: this.$store.state.product.images[this.selectedImage].node.id
-        }          
-      })
-      this.$store.commit("product/removeImage", this.selectedImage)
-      if (this.selectedImage !== 0) {
-        this.selectedImage -= 1
+          `,
+          variables: {
+            id: this.$store.state.product.images[this.selectedImage].node.id
+          }          
+        })
+        this.$store.commit("product/removeImage", this.selectedImage)
+        if (this.selectedImage !== 0) {
+          this.selectedImage -= 1
+        }
       }
     }
   }
