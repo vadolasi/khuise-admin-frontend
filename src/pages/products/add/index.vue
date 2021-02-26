@@ -31,7 +31,7 @@ fragment
             removeButtonClass="transition duration-200 ease-in-out p-1 rounded-md text-sm text-pink-500 border border-pink-500 bg-tranparent font-bold hover:bg-pink-200"
             radius="10"
           )
-        button(v-if="images[images.length - 1] || images.length == 0" class="transition duration-200 ease-in-out bg-transparent border border-pink-500 hover:bg-pink-300" style="border-radius: 10%" @click='images.push("")') jgidsfogjfdoijgdsjfgoidfg
+        button(v-if="images[images.length - 1] || images.length == 0" class="transition duration-200 ease-in-out bg-transparent border border-pink-500 hover:bg-pink-300" style="border-radius: 10%" @click='images.push("")') adicionar
       div(class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-10")
         button(class="transition duration-200 ease-in-out bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded" @click="save") Adicionar
         button(class="transition duration-200 ease-in-out bg-trasparent border border-pink-600 text-pink-600 hover:bg-pink-300 font-bold py-2 px-4 rounded" @click="$router.push('/products')") Cancelar
