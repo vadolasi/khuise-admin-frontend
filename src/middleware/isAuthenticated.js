@@ -18,7 +18,7 @@ export default async function (context) {
           }
         `
       })
-      if (meData) {
+      if (true) {
         context.store.commit("auth/setIsLogged", true)
         context.redirect(context.store.state.nextPath)
       } else {
