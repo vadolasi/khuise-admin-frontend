@@ -101,13 +101,6 @@ export default {
         }
       })
 
-      console.log(this.stock.map(
-            (productType) => {
-              return { product: productData.product.id, stock: Number(productType.stock), ...productType }
-            }
-          )
-        )
-
       const { data: { addStock: stockData  }  } = await this.$apollo.mutate({
         mutation: gql`
           mutation AddStock(
@@ -132,14 +125,6 @@ export default {
       if (!this.images[this.images.length - 1]) {
         this.images.splice(this.images.length - 1, 1)
       }
-
-      console.log(this.images.map((image) => {
-          return { 
-            product: productData.product.id,
-            image: image
-          }
-        })
-      )
 
       const { data: { addImages: imagesData  }  } = await this.$apollo.mutate({
         mutation: gql`

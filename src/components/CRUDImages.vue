@@ -5,6 +5,7 @@ div(class="col-span-2")
       button(v-for="(image, index) in imagesUrls" class="w-full mb-1 border border-pink-500 hover:border-pink-700" :class="(selectedImage == index) ? 'border-pink-500' : ''" :key="image" @click="selectedImage = index; addImage = false")
         img(:src="image" class="object-contain")
       button(class="w-full h-10 border border-pink-500 hover:border-pink-700" @click="addImage = true")
+        | Adicionar
     div(class="col-span-4")
       picture-input(
         @change="changeImage"
@@ -41,12 +42,12 @@ export default {
     imagesUrls () {
       return this.$store.state.product.images.map(
         (image) => {
-          return "https://dpkidwvuicjfi.cloudfront.net/media/" + image.node.image
+          return `https://dpkidwvuicjfi.cloudfront.net/media/${image.node.image}`
         }
       )
     },
     imageUrl () {
-       return `https://khuise-shop-6598.herokuapp.com/image?image=${this.$store.state.product.images[this.selectedImage].node.image}`
+       return `${process.env.BACKEND || "https://khuise-shop-6598.herokuapp.com"}/image?image=${this.$store.state.product.images[this.selectedImage].node.image}`
     }
   },
   methods: {
@@ -65,7 +66,7 @@ export default {
                image {
                   id
                   image
-               }
+                }
               }
             }
           `,
@@ -81,25 +82,31 @@ export default {
         await this.$apollo.mutate({
           mutation: gql`
             mutation UpdateImage(
+              $id: ID!
               $product: ID!
               $image: String!
             ) {
-              updateImage(input: {
-                product: $product
-                image: $image
-              }) {
+              updateImage(
+                id: $id
+                input: {
+                	product: $product
+                	image: $image
+              	}
+              ) {
                image {
                   id
                   image
-               }
+                }
               }
             }
           `,
           variables: {
+            id: this.$store.state.product.images[this.selectedImage].node.id,
             product: this.$store.state.product.id,
             image: image
           }
         })
+        this.$forceUpdate()
       }
     },
     async removeImage() {

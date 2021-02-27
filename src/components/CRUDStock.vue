@@ -124,8 +124,7 @@ export default {
     },
 
     async setStock (id, index) {
-      console.log(id)
-      const data = await this.$apollo.mutate({
+       const data = await this.$apollo.mutate({
         mutation: gql`
           mutation EditStock(
             $id: ID!
