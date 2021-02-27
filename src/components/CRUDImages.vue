@@ -75,11 +75,12 @@ export default {
             image: image
           }
         })
+        console.log(imageData)
         this.$store.commit("product/addImage", imageData.image.id, imageData.image.image)
         this.addImage = false
         this.selectedImage - this.$store.state.product.images.length
       } else {
-        await this.$apollo.mutate({
+        const { data: { updateImage: imageData } } = await this.$apollo.mutate({
           mutation: gql`
             mutation UpdateImage(
               $id: ID!
@@ -94,7 +95,6 @@ export default {
               	}
               ) {
                image {
-                  id
                   image
                 }
               }
@@ -106,7 +106,7 @@ export default {
             image: image
           }
         })
-        this.$forceUpdate()
+        this.$store.commit("product/updateImage", this.selectedImage, imageData.image.image)
       }
     },
     async removeImage() {
